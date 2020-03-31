@@ -2,6 +2,7 @@
 
 const fs = require('fs')
 const makeDir = require('mkdirp')
+const traceEvents = require('trace_events')
 const systemInfo = require('../collect/system-info.js')
 const ProcessStat = require('../collect/process-stat.js')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('doctor')
@@ -14,6 +15,10 @@ makeDir.sync(paths['/'])
 
 // write system file
 fs.writeFileSync(paths['/systeminfo'], JSON.stringify(systemInfo(), null, 2))
+
+const tracing = traceEvents.createTracing({
+  categories: ['v8']
+})
 
 const processStatEncoder = new ProcessStatEncoder()
 const out = processStatEncoder.pipe(fs.createWriteStream(paths['/processstat']))
@@ -39,10 +44,20 @@ function saveSample () {
 }
 
 // allow time delay to be specified before we start collecting data
-setTimeout(() => {
-  processStat.refresh()
-  scheduleSample()
-}, process.env.NODE_CLINIC_DOCTOR_TIMEOUT_DELAY)
+function start () {
+  tracing.enable()
+  process.nextTick(() => {
+    processStat.refresh()
+    scheduleSample()
+  })
+}
+
+const delay = parseInt(process.env.NODE_CLINIC_DOCTOR_TIMEOUT_DELAY || '0', 10)
+if (delay > 0) {
+  setTimeout(start, delay)
+} else {
+  start()
+}
 
 // before process exits, flush the encoded data to the sample file
 process.once('beforeExit', function () {

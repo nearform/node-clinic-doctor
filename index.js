@@ -48,8 +48,7 @@ class ClinicDoctor extends events.EventEmitter {
     // run program, but inject the sampler
     const logArgs = [
       '-r', 'no-cluster.js',
-      '-r', 'sampler.js',
-      '--trace-events-enabled', '--trace-event-categories', 'v8'
+      '-r', 'sampler.js'
     ]
 
     const stdio = ['inherit', 'inherit', 'inherit']
