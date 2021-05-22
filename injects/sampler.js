@@ -1,22 +1,36 @@
 'use strict'
 
+// Important to keep in mind that every Node.js worker thread
+// will run it's own instance of the sample.js.
+
 const fs = require('fs')
 const makeDir = require('mkdirp')
 const systemInfo = require('../collect/system-info.js')
 const ProcessStat = require('../collect/process-stat.js')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('doctor')
 const ProcessStatEncoder = require('../format/process-stat-encoder.js')
+const { isMainThread, threadId } = require('worker_threads')
 
 // create encoding files and directory
 const paths = getLoggingPaths({ path: process.env.NODE_CLINIC_DOCTOR_DATA_PATH, identifier: process.pid })
 
 makeDir.sync(paths['/'])
 
-// write system file
-fs.writeFileSync(paths['/systeminfo'], JSON.stringify(systemInfo(), null, 2))
+// write system file only on the main thread
+if (isMainThread) {
+  fs.writeFileSync(paths['/systeminfo'], JSON.stringify(systemInfo(), null, 2))
+}
 
 const processStatEncoder = new ProcessStatEncoder()
-const out = processStatEncoder.pipe(fs.createWriteStream(paths['/processstat']))
+
+// If sampling in a worker thread, we have to write samples
+// out to a separate processstat file.
+let outpath = paths['/processstat']
+if (!isMainThread) {
+  outpath += `-${threadId}`
+}
+
+const out = processStatEncoder.pipe(fs.createWriteStream(outpath))
 
 // sample every 10ms
 const processStat = new ProcessStat(parseInt(
