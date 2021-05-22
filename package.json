@@ -16,7 +16,7 @@
     "@nearform/clinic-common": "^6.0.0",
     "@nearform/node-trace-log-join": "2.0.0-0",
     "@nearform/trace-events-parser": "^1.0.4",
-    "@tensorflow/tfjs-core": "^1.2.1",
+    "@tensorflow/tfjs-core": "^2.0.0",
     "async": "^3.0.1",
     "clipboard-copy": "^4.0.1",
     "d3-array": "^2.0.0",
