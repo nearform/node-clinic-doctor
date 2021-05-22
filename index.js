@@ -42,6 +42,7 @@ class ClinicDoctor extends events.EventEmitter {
     this.detectPort = detectPort
     this.debug = debug
     this.path = dest
+    this.issue = null
   }
 
   collect (args, callback) {
@@ -166,13 +167,16 @@ class ClinicDoctor extends events.EventEmitter {
       new ProcessStatDecoder()
     )
 
+    const analysis = new Analysis(systemInfoReader, traceEventReader, processStatReader)
+    analysis.on('data', (data) => { this.issue = data.issueCategory })
     // create analysis
     const analysisStringified = pumpify(
-      new Analysis(systemInfoReader, traceEventReader, processStatReader),
+      analysis,
       new stream.Transform({
         readableObjectMode: false,
         writableObjectMode: true,
         transform (data, encoding, callback) {
+          this.issue = data.issueCategory
           callback(null, JSON.stringify(data))
         }
       })
