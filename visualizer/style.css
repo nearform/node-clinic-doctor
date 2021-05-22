@@ -886,6 +886,16 @@ html.recommendation-open #graph .sub-graph .chart .interval {
   top: 0.2em;
 }
 
+#version-info {
+  margin-top: 16px;
+}
+
+.version-holder {
+  color: var(--graph-text-color);
+  padding-left: 12px;
+  font-size: 11pt;
+}
+
 /* PRINT ONLY */
 
 @media print {

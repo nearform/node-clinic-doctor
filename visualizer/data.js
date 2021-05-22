@@ -8,16 +8,17 @@ function loaddata (callback) {
 }
 module.exports = loaddata
 
-function wrapData (data) {
-  return new Data(data.analysis, data.processStat)
+function wrapData () {
+  return new Data(data.analysis, data.processStat, data.systemInfo, data.args)
 }
 
 // Construct data container
 class Data {
-  constructor (analysis, data) {
+  constructor (analysis, data, system, args) {
     this.analysis = analysis
     this.data = data
-
+    this.system = system[0]
+    this.args = args
     this.rawTimestamp = data.map((point) => point.timestamp)
 
     this.cpu = data.map((point) => ({
@@ -55,7 +56,9 @@ class Data {
       cpu: this.cpu[index],
       delay: this.delay[index],
       memory: this.memory[index],
-      handles: this.handles[index]
+      handles: this.handles[index],
+      system: this.system,
+      args: this.args
     }
   }
 }

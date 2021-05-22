@@ -45,6 +45,7 @@ class ClinicDoctor extends events.EventEmitter {
   }
 
   collect (args, callback) {
+    this.args = args
     // run program, but inject the sampler
     const logArgs = [
       '-r', 'no-cluster.js',
@@ -194,6 +195,14 @@ class ClinicDoctor extends events.EventEmitter {
       })
     )
 
+    const systemInfoStringify = pumpify(
+      systemInfoReader,
+      new Stringify({
+        seperator: ',\n',
+        stringifier: JSON.stringify
+      })
+    )
+
     const hasFreeMemory = () => {
       const used = process.memoryUsage().heapTotal / HEAP_MAX
       if (used > 0.5) {
@@ -206,11 +215,15 @@ class ClinicDoctor extends events.EventEmitter {
 
     const checkHeapInterval = setInterval(hasFreeMemory, 50)
 
+    const argsString = JSON.stringify(this.args)
+
     const dataFile = streamTemplate`
       {
         "traceEvent": ${traceEventStringify},
         "processStat": ${processStatStringify},
-        "analysis": ${analysisStringified}
+        "analysis": ${analysisStringified},
+        "systemInfo": ${systemInfoStringify},
+        "args": ${argsString}
       }
     `
 
@@ -248,6 +261,7 @@ class ClinicDoctor extends events.EventEmitter {
         <div id="menu"></div>
       </div>
       <div id="graph"></div>
+      <div id="version-info"></div>
       <div id="recommendation-space"></div>
       <div id="recommendation"></div>
       ${recommendations}
