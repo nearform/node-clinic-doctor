@@ -43,6 +43,7 @@
     "ttest": "^3.0.0"
   },
   "devDependencies": {
+    "atomic-sleep": "^1.0.0",
     "cheerio": "^1.0.0-rc.2",
     "chokidar": "^3.4.3",
     "lodash.debounce": "^4.0.8",
